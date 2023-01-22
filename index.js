@@ -1,27 +1,28 @@
-const characterInPasswordCounter = (fileLines)=>{
+import _ from "lodash";
+
+const count = (str, ch) => _.countBy(str)[ch] || 0;
+
+const characterInPasswordCounter = (fileLines) => {
   const validPaswordsArray = fileLines.filter((el) => {
     const [character, allowedAmount, password] = el.split(" ");
-    const [minAmount, maxAmount] = allowedAmount.slice(0, -1).split("-");
-    const totalCharacterCount = (
-      password.match(new RegExp(character, "g")) || []
-    ).length;
-    if (
-      +minAmount <= totalCharacterCount &&
-      totalCharacterCount <= +maxAmount
-    ) {
-      return el;
-    }
+    const [minAmount, maxAmount] = allowedAmount?.slice(0, -1)?.split("-");
+    const totalCharacterCount = count(password, character);
+    const num_in_range = _.inRange(totalCharacterCount, +minAmount, +maxAmount);
+    if (num_in_range) return el;
   });
-  const validPaswordsAmount = validPaswordsArray.length; 
+  const validPaswordsAmount = validPaswordsArray.length;
   return validPaswordsAmount;
-}
+};
 
 fetch("data.txt")
   .then((response) => response.text())
   .then((text) => {
-    const fileLines = text.split("\n");
-    const result = characterInPasswordCounter(fileLines)
+    const fileLines = text.split("\n").filter(Boolean);
+    const result = characterInPasswordCounter(fileLines);
+    document.getElementById("app").innerHTML = fileLines;
+    console.log(fileLines);
     console.log(result);
-  }).catch(err=>{
-    console.error('There is an error: ', err);
+  })
+  .catch(function (err) {
+    console.log("Fetch problem show: " + err.message);
   });
